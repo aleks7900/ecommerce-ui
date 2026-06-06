@@ -4,9 +4,12 @@ import {
     CardContent,
     CircularProgress,
     Container,
+    Fab,
     Grid,
     Typography
 } from "@mui/material";
+
+import AddIcon from "@mui/icons-material/Add";
 
 import {
     useQuery
@@ -136,6 +139,23 @@ export default function ProductsPage() {
                 ))}
 
             </Grid>
+
+            <Fab
+                color="primary"
+                aria-label="add product"
+                sx={{
+                    position: "fixed",
+                    bottom: 24,
+                    right: 24
+                }}
+                onClick={() =>
+                    navigate(
+                        "/products/create"
+                    )
+                }
+            >
+                <AddIcon />
+            </Fab>
 
         </Container>
     );

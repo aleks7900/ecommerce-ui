@@ -1,5 +1,4 @@
 import { apiClient } from "../../api/apiClient";
-import type {Product} from "../types.ts";
 
 export async function getProducts(): Promise<Product[]> {
 
@@ -22,3 +21,36 @@ export async function getProduct(
 
     return response.data;
 }
+
+export interface Product {
+
+    id: string;
+
+    name: string;
+
+    description: string;
+
+    price: number;
+}
+
+export interface CreateProductRequest {
+
+    name: string;
+
+    description: string;
+
+    price: number;
+}
+
+export const createProduct = async (
+    product: CreateProductRequest
+): Promise<Product> => {
+
+    const response =
+        await apiClient.post<Product>(
+            "/api/products",
+            product
+        );
+
+    return response.data;
+};

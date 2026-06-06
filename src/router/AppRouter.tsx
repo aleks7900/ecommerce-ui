@@ -10,6 +10,7 @@ import AppLayout from "../layouts/AppLayout.tsx";
 import DashboardPage from "../pages/DashboardPage.tsx";
 import AnalyticsPage from "../pages/AnalyticsPage.tsx";
 import ProfilePage from "../pages/ProfilePage.tsx";
+import CreateProductPage from "../features/products/CreateProductPage.tsx";
 
 export function AppRouter() {
     return (
@@ -36,6 +37,11 @@ export function AppRouter() {
                     <Route
                         path="/products"
                         element={<ProductsPage />}
+                    />
+
+                    <Route
+                        path="/products/create"
+                        element={<CreateProductPage />}
                     />
 
                     <Route
