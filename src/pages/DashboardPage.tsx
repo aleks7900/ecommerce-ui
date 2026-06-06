@@ -4,123 +4,87 @@ import {
     Grid,
     Typography
 } from "@mui/material";
+import {useDashboardMetrics} from "../features/analytics/useDashboardMetrics.ts";
 
 export default function DashboardPage() {
 
+    const {
+        data,
+        isLoading
+    } = useDashboardMetrics();
+
+    if (isLoading) {
+
+        return <>Loading...</>;
+    }
+
     return (
 
-        <>
+        <Grid
+            container
+            spacing={3}
+        >
 
-            <Typography
-                variant="h4"
-                gutterBottom
-            >
-                Dashboard
-            </Typography>
+            <Grid size={{ xs: 12, md: 4 }}>
 
-            <Grid
-                container
-                spacing={3}
-            >
+                <Card>
 
-                <Grid size={{ xs: 12, md: 3 }}>
+                    <CardContent>
 
-                    <Card>
+                        <Typography>
+                            Orders
+                        </Typography>
 
-                        <CardContent>
+                        <Typography variant="h4">
+                            {data?.totalOrders ?? 0}
+                        </Typography>
 
-                            <Typography>
+                    </CardContent>
 
-                                Orders
-
-                            </Typography>
-
-                            <Typography
-                                variant="h4"
-                            >
-                                154
-                            </Typography>
-
-                        </CardContent>
-
-                    </Card>
-
-                </Grid>
-
-                <Grid size={{ xs: 12, md: 3 }}>
-
-                    <Card>
-
-                        <CardContent>
-
-                            <Typography>
-
-                                Revenue
-
-                            </Typography>
-
-                            <Typography
-                                variant="h4"
-                            >
-                                $12,450
-                            </Typography>
-
-                        </CardContent>
-
-                    </Card>
-
-                </Grid>
-
-                <Grid size={{ xs: 12, md: 3 }}>
-
-                    <Card>
-
-                        <CardContent>
-
-                            <Typography>
-
-                                Products
-
-                            </Typography>
-
-                            <Typography
-                                variant="h4"
-                            >
-                                68
-                            </Typography>
-
-                        </CardContent>
-
-                    </Card>
-
-                </Grid>
-
-                <Grid size={{ xs: 12, md: 3 }}>
-
-                    <Card>
-
-                        <CardContent>
-
-                            <Typography>
-
-                                Customers
-
-                            </Typography>
-
-                            <Typography
-                                variant="h4"
-                            >
-                                520
-                            </Typography>
-
-                        </CardContent>
-
-                    </Card>
-
-                </Grid>
+                </Card>
 
             </Grid>
 
-        </>
+            <Grid size={{ xs: 12, md: 4 }}>
+
+                <Card>
+
+                    <CardContent>
+
+                        <Typography>
+                            Revenue
+                        </Typography>
+
+                        <Typography variant="h4">
+                            ${data?.totalRevenue ?? 0}
+                        </Typography>
+
+                    </CardContent>
+
+                </Card>
+
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 4 }}>
+
+                <Card>
+
+                    <CardContent>
+
+                        <Typography>
+                            Customers
+                        </Typography>
+
+                        <Typography variant="h4">
+                            {data?.totalCustomers ?? 0}
+                        </Typography>
+
+                    </CardContent>
+
+                </Card>
+
+            </Grid>
+
+        </Grid>
     );
 }
