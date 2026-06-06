@@ -1,4 +1,5 @@
 import {
+    Alert,
     Button,
     Card,
     CardContent,
@@ -10,9 +11,12 @@ import {
 
 import { useState } from "react";
 
+import { useMutation } from "@tanstack/react-query";
+
 import { register } from "./authApi";
 
 import { useNavigate } from "react-router-dom";
+import type {AxiosError} from "axios";
 
 export default function RegisterPage() {
 
@@ -30,39 +34,40 @@ export default function RegisterPage() {
     const [password, setPassword] =
         useState("");
 
-    const [loading, setLoading] =
-        useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [errorMessage, setErrorMessage] =
+        useState("");
 
-    async function handleRegister() {
+    const registerMutation =
+        useMutation({
 
-        try {
+            mutationFn: register,
 
-            setLoading(true);
+            onSuccess: () => {
 
-            await register({
-                firstName,
-                lastName,
-                email,
-                password
-            });
+                setErrorMessage("");
 
-            alert(
-                "Registration successful"
-            );
+                navigate("/login");
+            },
 
-            navigate("/login");
+            onError: (error: AxiosError<{ message: string }>) => {
 
-        } catch {
+                setErrorMessage(
+                    error.response?.data?.message
+                    ?? "Registration failed"
+                );
+            }
+        });
 
-            alert(
-                "Registration failed"
-            );
+    const handleRegister = () => {
 
-        } finally {
-
-            setLoading(false);
-        }
-    }
+        registerMutation.mutate({
+            firstName,
+            lastName,
+            email,
+            password
+        });
+    };
 
     return (
 
@@ -127,12 +132,39 @@ export default function RegisterPage() {
                             }
                         />
 
+                        {
+                            errorMessage && (
+
+                                <Alert severity="error">
+
+                                    {errorMessage}
+
+                                </Alert>
+                            )
+                        }
+                        {
+                            registerMutation.isSuccess && (
+
+                                <Alert severity="success">
+
+                                    Registration successful
+
+                                </Alert>
+                            )
+                        }
+
                         <Button
                             variant="contained"
                             onClick={handleRegister}
-                            disabled={loading}
+                            disabled={
+                                registerMutation.isPending
+                            }
                         >
-                            Register
+                            {
+                                registerMutation.isPending
+                                    ? "Registering..."
+                                    : "Register"
+                            }
                         </Button>
 
                     </Stack>

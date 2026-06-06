@@ -2,14 +2,10 @@ import {
     Button,
     Card,
     CardContent,
+    CircularProgress,
     Container,
     Typography
 } from "@mui/material";
-
-import {
-    useEffect,
-    useState
-} from "react";
 
 import {
     useNavigate,
@@ -17,10 +13,12 @@ import {
 } from "react-router-dom";
 
 import {
+    useQuery
+} from "@tanstack/react-query";
+
+import {
     getProduct
 } from "./productApi";
-import type {Product} from "../types.ts";
-
 
 export default function ProductDetailsPage() {
 
@@ -30,24 +28,65 @@ export default function ProductDetailsPage() {
     const navigate =
         useNavigate();
 
-    const [product, setProduct] =
-        useState<Product>();
+    const {
+        data: product,
+        isLoading,
+        isError
+    } = useQuery({
 
-    useEffect(() => {
+        queryKey: [
+            "product",
+            id
+        ],
 
-        if (id) {
+        queryFn: () =>
+            getProduct(
+                id!
+            ),
 
-            getProduct(id)
-                .then(setProduct);
-        }
+        enabled: !!id
+    });
 
-    }, [id]);
+    if (isLoading) {
+
+        return (
+
+            <Container sx={{ mt: 5 }}>
+
+                <CircularProgress />
+
+            </Container>
+        );
+    }
+
+    if (isError) {
+
+        return (
+
+            <Container sx={{ mt: 5 }}>
+
+                <Typography>
+
+                    Failed to load product
+
+                </Typography>
+
+            </Container>
+        );
+    }
 
     if (!product) {
 
         return (
-            <Container>
-                Loading...
+
+            <Container sx={{ mt: 5 }}>
+
+                <Typography>
+
+                    Product not found
+
+                </Typography>
+
             </Container>
         );
     }
@@ -79,6 +118,7 @@ export default function ProductDetailsPage() {
                     </Typography>
 
                     <Button
+                        sx={{ mt: 3 }}
                         variant="contained"
                         onClick={() =>
                             navigate(

@@ -1,53 +1,121 @@
-import {Card, CardContent, Chip, Container, Stack, Typography} from "@mui/material";
+import {
+    Card,
+    CardContent,
+    Chip,
+    CircularProgress,
+    Container,
+    Stack,
+    Typography
+} from "@mui/material";
 
-import {useEffect, useState} from "react";
+import { useEffect } from "react";
 
-import {getOrders} from "./orderApi";
-import type {Order} from "../types.ts";
-import {connectOrderSocket} from "../../websocket/orderSocket.ts";
+import {
+    useQuery,
+    useQueryClient
+} from "@tanstack/react-query";
+
+import {
+    getOrders
+} from "./orderApi";
+
+import type {
+    Order
+} from "../types";
+
+import {
+    connectOrderSocket
+} from "../../websocket/orderSocket";
 
 export default function OrdersPage() {
 
-    const [orders, setOrders] =
-        useState<Order[]>([]);
+    const queryClient =
+        useQueryClient();
+
+    const {
+        data: orders = [],
+        isLoading,
+        isError
+    } = useQuery({
+
+        queryKey: ["orders"],
+
+        queryFn: getOrders
+    });
 
     useEffect(() => {
-
-        (async () => {
-
-            const data =
-                await getOrders();
-
-            setOrders(data);
-
-        })();
 
         const client =
             connectOrderSocket(
                 orderUpdate => {
 
-                    setOrders(current =>
-                        current.map(order =>
-                            order.id === orderUpdate.orderId
-                                ? {
-                                    ...order,
-                                    status: orderUpdate.status
-                                }
-                                : order
-                        )
+                    queryClient.setQueryData<Order[]>(
+
+                        ["orders"],
+
+                        current => {
+
+                            if (!current) {
+                                return [];
+                            }
+
+                            return current.map(
+                                order =>
+
+                                    order.id ===
+                                    orderUpdate.orderId
+
+                                        ? {
+                                            ...order,
+                                            status:
+                                            orderUpdate.status
+                                        }
+
+                                        : order
+                            );
+                        }
                     );
                 }
             );
 
         return () => {
+
             client.deactivate();
         };
 
-    }, []);
+    }, [queryClient]);
+
+    if (isLoading) {
+
+        return (
+
+            <Container sx={{ mt: 4 }}>
+
+                <CircularProgress />
+
+            </Container>
+        );
+    }
+
+    if (isError) {
+
+        return (
+
+            <Container sx={{ mt: 4 }}>
+
+                <Typography>
+
+                    Failed to load orders
+
+                </Typography>
+
+            </Container>
+        );
+    }
 
     return (
 
-        <Container sx={{mt: 4}}>
+        <Container sx={{ mt: 4 }}>
 
             <Typography
                 variant="h4"
@@ -69,25 +137,19 @@ export default function OrdersPage() {
                             </Typography>
 
                             <Typography>
-                                Product:
-                                {" "}
-                                {order.productId}
+                                Product: {order.productId}
                             </Typography>
 
                             <Typography>
-                                Quantity:
-                                {" "}
-                                {order.quantity}
+                                Quantity: {order.quantity}
                             </Typography>
 
                             <Typography>
-                                Price:
-                                {" "}
-                                ${order.totalPrice}
+                                Price: ${order.totalPrice}
                             </Typography>
 
                             <Chip
-                                sx={{mt: 1}}
+                                sx={{ mt: 1 }}
                                 label={order.status}
                             />
 

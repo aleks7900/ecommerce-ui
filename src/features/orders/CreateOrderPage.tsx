@@ -1,4 +1,5 @@
 import {
+    Alert,
     Button,
     Card,
     CardContent,
@@ -9,6 +10,8 @@ import {
 
 import { useState } from "react";
 
+import { useMutation } from "@tanstack/react-query";
+
 import {
     useNavigate,
     useParams
@@ -17,6 +20,8 @@ import {
 import {
     createOrder
 } from "./orderApi";
+import type {CreateOrderRequest, Order} from "../types.ts";
+import type {AxiosError} from "axios";
 
 export default function CreateOrderPage() {
 
@@ -29,23 +34,36 @@ export default function CreateOrderPage() {
     const [quantity, setQuantity] =
         useState(1);
 
-    async function handleCreateOrder() {
+    const createOrderMutation = useMutation<
+        Order,
+        AxiosError<{ message: string }>,
+        CreateOrderRequest
+    >({
+        mutationFn: createOrder,
+
+        onSuccess: () => {
+            navigate("/orders");
+        }
+    });
+
+    const handleCreateOrder = () => {
 
         if (!productId) {
             return;
         }
 
-        await createOrder({
+        createOrderMutation.mutate({
             productId,
             quantity
         });
-
-        navigate("/orders");
-    }
+    };
 
     return (
 
-        <Container maxWidth="sm" sx={{ mt: 5 }}>
+        <Container
+            maxWidth="sm"
+            sx={{ mt: 5 }}
+        >
 
             <Card>
 
@@ -72,12 +90,36 @@ export default function CreateOrderPage() {
                         }
                     />
 
+                    {
+                        createOrderMutation.isError && (
+
+                            <Alert severity="error">
+
+                                {
+                                    createOrderMutation.error
+                                        ?.response
+                                        ?.data
+                                        ?.message
+                                    ?? "Failed to create order"
+                                }
+
+                            </Alert>
+                        )
+                    }
+
                     <Button
                         sx={{ mt: 3 }}
                         variant="contained"
                         onClick={handleCreateOrder}
+                        disabled={
+                            createOrderMutation.isPending
+                        }
                     >
-                        Place Order
+                        {
+                            createOrderMutation.isPending
+                                ? "Creating..."
+                                : "Place Order"
+                        }
                     </Button>
 
                 </CardContent>

@@ -1,51 +1,67 @@
-import {Button, Card, CardContent, CircularProgress, Container, Grid, Typography} from "@mui/material";
+import {
+    Button,
+    Card,
+    CardContent,
+    CircularProgress,
+    Container,
+    Grid,
+    Typography
+} from "@mui/material";
 
-import {useEffect, useState} from "react";
+import {
+    useQuery
+} from "@tanstack/react-query";
 
-import {getProducts} from "./productApi";
+import {
+    useNavigate
+} from "react-router-dom";
 
-import {useNavigate} from "react-router-dom";
-import type {Product} from "../types.ts";
+import {
+    getProducts
+} from "./productApi";
 
 export default function ProductsPage() {
 
     const navigate =
         useNavigate();
 
-    const [products, setProducts] =
-        useState<Product[]>([]);
+    const {
+        data: products = [],
+        isLoading,
+        isError
+    } = useQuery({
 
-    const [loading, setLoading] =
-        useState(true);
+        queryKey: [
+            "products"
+        ],
 
-    async function loadProducts() {
+        queryFn:
+        getProducts
+    });
 
-        try {
-
-            const data =
-                await getProducts();
-
-            setProducts(data);
-
-        } finally {
-
-            setLoading(false);
-        }
-    }
-
-    useEffect(() => {
-
-        loadProducts();
-
-    }, []);
-
-    if (loading) {
+    if (isLoading) {
 
         return (
 
-            <Container sx={{mt: 5}}>
+            <Container sx={{ mt: 5 }}>
 
-                <CircularProgress/>
+                <CircularProgress />
+
+            </Container>
+        );
+    }
+
+    if (isError) {
+
+        return (
+
+            <Container sx={{ mt: 5 }}>
+
+                <Typography>
+
+                    Failed to load products
+
+                </Typography>
 
             </Container>
         );
@@ -53,7 +69,7 @@ export default function ProductsPage() {
 
     return (
 
-        <Container sx={{mt: 4}}>
+        <Container sx={{ mt: 4 }}>
 
             <Typography
                 variant="h4"
@@ -70,11 +86,11 @@ export default function ProductsPage() {
                 {products.map(product => (
 
                     <Grid
+                        key={product.id}
                         size={{
                             xs: 12,
                             md: 4
                         }}
-                        key={product.id}
                     >
 
                         <Card>
@@ -88,19 +104,19 @@ export default function ProductsPage() {
                                 </Typography>
 
                                 <Typography
-                                    sx={{mt: 1}}
+                                    sx={{ mt: 1 }}
                                 >
                                     {product.description}
                                 </Typography>
 
                                 <Typography
-                                    sx={{mt: 2}}
+                                    sx={{ mt: 2 }}
                                 >
                                     ${product.price}
                                 </Typography>
 
                                 <Button
-                                    sx={{mt: 2}}
+                                    sx={{ mt: 2 }}
                                     variant="contained"
                                     onClick={() =>
                                         navigate(

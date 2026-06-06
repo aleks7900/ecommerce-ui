@@ -10,18 +10,22 @@ import {
 
 import { useState } from "react";
 
+import { useMutation } from "@tanstack/react-query";
+
 import { login } from "./authApi";
 
 import { useDispatch } from "react-redux";
 
-import { loginSuccess }
-    from "./authSlice";
-import {Link, useNavigate} from "react-router-dom";
+import { loginSuccess } from "./authSlice";
+
+import {
+    Link,
+    useNavigate
+} from "react-router-dom";
 
 export default function LoginPage() {
 
-    const dispatch =
-        useDispatch();
+    const dispatch = useDispatch();
 
     const navigate = useNavigate();
 
@@ -31,48 +35,45 @@ export default function LoginPage() {
     const [password, setPassword] =
         useState("");
 
-    const [loading, setLoading] =
-        useState(false);
+    const loginMutation =
+        useMutation({
 
-    async function handleLogin() {
+            mutationFn: login,
 
-        try {
+            onSuccess: (response) => {
 
-            setLoading(true);
+                dispatch(
+                    loginSuccess(
+                        response.accessToken
+                    )
+                );
 
-            const response =
-                await login({
-                    email,
-                    password
-                });
+                navigate(
+                    "/products"
+                );
+            },
 
-            dispatch(
-                loginSuccess(
-                    response.accessToken
-                )
-            );
+            onError: () => {
 
-            navigate("/products");
+                alert(
+                    "Invalid credentials"
+                );
+            }
+        });
 
-        } catch {
+    const handleLogin = () => {
 
-            alert(
-                "Invalid credentials"
-            );
-
-        } finally {
-
-            setLoading(false);
-        }
-    }
+        loginMutation.mutate({
+            email,
+            password
+        });
+    };
 
     return (
 
         <Container
             maxWidth="sm"
-            sx={{
-                mt: 10
-            }}
+            sx={{ mt: 10 }}
         >
 
             <Card>
@@ -112,20 +113,27 @@ export default function LoginPage() {
                         <Button
                             variant="contained"
                             onClick={handleLogin}
-                            disabled={loading}
+                            disabled={
+                                loginMutation.isPending
+                            }
                         >
-                            Login
+                            {
+                                loginMutation.isPending
+                                    ? "Signing in..."
+                                    : "Login"
+                            }
                         </Button>
 
                         <Typography>
 
-                            Don't have an account?
+                            Don't have an account?{" "}
 
                             <Link to="/register">
                                 Register
                             </Link>
 
                         </Typography>
+
                     </Stack>
 
                 </CardContent>
